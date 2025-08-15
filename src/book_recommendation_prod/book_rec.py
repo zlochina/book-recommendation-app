@@ -3,23 +3,66 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import argparse
+import os
+import zipfile
+import requests
+
+DOWNLOAD_URI = "https://www.kaggle.com/api/v1/datasets/download/arashnic/book-recommendation-dataset"
+RATINGS_FNAME = "Ratings.csv"
+BOOKS_FNAME = "Books.csv"
+
 
 ### LOADING DATA
+def download_kaggle_ds(data_dir):
+    # Check if files already exist:
+    if all(os.path.exists(os.path.join(data_dir, f)) for f in [BOOKS_FNAME, RATINGS_FNAME]):
+        print("Files already exist.")
+        return
+    url = DOWNLOAD_URI
+    dest_path = data_dir / "book-recommendation-dataset.zip"
+
+    os.makedirs(dest_path.parent, exist_ok=True)
+    os.makedirs(data_dir, exist_ok=True)
+    print(f"Starting download from:\n{url}\n")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 1024
+    downloaded_size = 0
+
+    with open(dest_path, 'wb') as file:
+        for data in response.iter_content(block_size):
+            file.write(data)
+            downloaded_size += len(data)
+            percent = downloaded_size * 100 / total_size if total_size else 0
+            print(f"\rDownloaded: {percent:.2f}%", end="")
+
+    print(f"\nDownload complete: {dest_path}")
+
+    print(f"\nExtracting files to:\n{data_dir}\n")
+    with zipfile.ZipFile(dest_path, 'r') as zip_ref:
+        file_list = zip_ref.namelist()
+        for file in file_list:
+            print(f"Extracting: {file}")
+        zip_ref.extractall(data_dir)
+    print("\nExtraction complete.")
+
 def load_data(download=False, data_dir="csv_data/"):
+    data_dir = Path(data_dir)
     # Download from kaggle
     if download:
-        # TODO: download from kaggle
+        download_kaggle_ds(data_dir)
         pass
     # filenames
-    ratings_fname = "BX-Book-Ratings.csv"
-    books_fname = "BX-Books.csv"
-    data_dir = Path(data_dir)
+    # RATINGS_FNAME = "BX-Book-Ratings.csv"
+    # BOOKS_FNAME = "BX-Books.csv"
 
     # read csv files
     print("\n")
-    ratings = pd.read_csv(data_dir / ratings_fname, encoding='cp1251', sep=';', on_bad_lines="warn")
+    ratings = pd.read_csv(data_dir / RATINGS_FNAME, on_bad_lines="warn")
     print("\n")
-    books = pd.read_csv(data_dir / books_fname,  encoding='cp1251', sep=';', on_bad_lines="warn")
+    books = pd.read_csv(data_dir / BOOKS_FNAME, on_bad_lines="warn")
     print("\n")
     return (ratings, books)
 ###

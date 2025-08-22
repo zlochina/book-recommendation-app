@@ -22,12 +22,7 @@ class BookRecommendationResponse(BaseModel):
     book_id: int
     recommendations: List[Book]
 
-class RatingRequest(BaseModel):
-    user_id: int
-    book_id: int
-    rating: float
-
-class Rating:
+class Rating(BaseModel):
     rating_id: int
     user_id: int
     book_isbn: str

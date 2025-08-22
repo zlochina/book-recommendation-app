@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api import book_user, rating_user
+from .api import book_user, rating_user
 
 app = FastAPI(title="Book Recommendation API")
 

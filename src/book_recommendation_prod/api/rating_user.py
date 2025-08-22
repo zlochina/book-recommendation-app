@@ -4,6 +4,6 @@ from ..services.rating_manager import BookRatingManager
 
 router = APIRouter()
 
-@router.get("/{book_id}", response_model=RatingsResponse)
+@router.get("/{book_id}/ratings", response_model=RatingsResponse)
 def get_ratings(book_id: int, manager: BookRatingManager = Depends()):
     return manager.get_ratings(book_id)

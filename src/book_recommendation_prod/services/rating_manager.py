@@ -10,9 +10,9 @@ class BookRatingManager:
         ratings = list()
         book_title = self.books.iloc[book_id]['Book-Title'].lower()
         records = self.dataset_preprocessed[self.dataset_preprocessed['Book-Title'] == book_title]
-        for record in records:
+        for _, record in records.iterrows():
             ratings.append(Rating(
-                rating_id=record['rating-id'],
+                rating_id=int(record['rating-id']),
                 user_id=record['User-ID'],
                 book_isbn=record["ISBN"],
                 user_rating=record["Book-Rating"],

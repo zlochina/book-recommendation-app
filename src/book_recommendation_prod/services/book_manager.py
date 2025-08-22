@@ -9,7 +9,8 @@ class BookManager:
         self.ratings, self.books, self.dataset_preprocessed = init_pseudo_db()
 
     def get_recommendations(self, book_id: int) -> BookRecommendationResponse:
-        book_title = self._get_book_title_by_id(book_id)
+        book_title = self._get_book_title_by_id(book_id).lower()
+        print(book_title)
         ratings_data_raw = extract_interesting_books(self.ratings, self.dataset_preprocessed, book_title)
         best_list, _ = compute_final_rating(ratings_data_raw, book_title) # TODO: computing rating should be done when the records are added to the db
         #
@@ -23,8 +24,8 @@ class BookManager:
         #
 
         indices_best = list()
-        for book_record in best_list:
-            indices_best.append(self._get_book_record_by_title(book_record["book"])["id"])
+        for book_record in best_list['book'].tolist():
+            indices_best.append(self._get_book_record_by_title(book_record)["id"])
 
         recommendations = [Book(
             book_id=book_record["id"],
@@ -44,8 +45,8 @@ class BookManager:
 
     def _get_book_record_by_title(self, book_title: str):
         book_title = book_title.lower()
-        variants = self.dataset_preprocessed[self.dataset_preprocessed['Book-Title'] == book_title]
-        return self.books[self.books["ISBN"] == variants.value_counts().idxmax()]
+        variants = self.dataset_preprocessed[self.dataset_preprocessed['Book-Title'] == book_title]["ISBN"]
+        return self.books[self.books["ISBN"] == variants.value_counts().idxmax()].iloc[0]
 
     def _get_book_title_by_id(self, book_id: int) -> str:
         return self._get_book_record_by_id(book_id)["Book-Title"]

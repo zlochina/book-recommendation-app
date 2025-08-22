@@ -13,9 +13,9 @@ class BookDetailed(Book):
     publisher: str
     image_url_medium: str
     image_url_large: str
-    average_rating: str
-    weighted_rating: str
-    ratings_count: str
+    average_rating: str | None
+    weighted_rating: str | None
+    ratings_count: str | None
 
 
 class BookRecommendationResponse(BaseModel):

@@ -10,7 +10,6 @@ class BookManager:
 
     def get_recommendations(self, book_id: int) -> BookRecommendationResponse:
         book_title = self._get_book_title_by_id(book_id).lower()
-        print(book_title)
         ratings_data_raw = extract_interesting_books(self.ratings, self.dataset_preprocessed, book_title)
         best_list, _ = compute_final_rating(ratings_data_raw, book_title) # TODO: computing rating should be done when the records are added to the db
         #

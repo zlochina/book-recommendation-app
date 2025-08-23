@@ -1,6 +1,9 @@
+import pandas as pd
+
 from ..models.schemas import BookRecommendationResponse, BookDetailed, Book
 from ..core.book_rec import extract_interesting_books, compute_final_rating
 from .utils import init_pseudo_db
+from typing import List
 
 
 class BookManager:
@@ -66,3 +69,19 @@ class BookManager:
             weighted_rating=None,
             ratings_count=None,
         )
+
+    def search_books(self, query) -> List[Book]:
+        # TODO: replace with TF-IDF for non-db architecture or with Embedding search for db architecture
+        mask = self.books["Book-Title"].str.contains(query, case=False, na=False)
+        results: pd.DataFrame = self.books[mask]
+
+        output = list()
+        for _, record in results.iterrows():
+            output.append(Book(
+                book_id=int(record["id"]),
+                title=record["Book-Title"],
+                author=record["Book-Author"],
+                image_url_thumb=record["Image-URL-S"],
+            ))
+
+        return output

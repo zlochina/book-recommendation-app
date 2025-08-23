@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from ..models.schemas import Book, BookRecommendationResponse, BookDetailed
 from ..services.book_manager import BookManager
+from typing import List
 
 router = APIRouter()
 
@@ -11,3 +12,7 @@ def get_recommendations(book_id: int, manager: BookManager = Depends()):
 @router.get("/{book_id}", response_model=BookDetailed)
 def get_book_details(book_id: int, manager: BookManager = Depends()):
     return manager.get_book_details(book_id)
+
+@router.get("", response_model=List[Book])
+def search_books(query: str, manager: BookManager = Depends()):
+    return manager.search_books(query)

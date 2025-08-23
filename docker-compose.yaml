@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: bookrec-backend
+    ports:
+      - "8000:8000"
+#    volumes:
+#      - ./src:/app/src  # optional: live code reload for dev
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./src/book_recommendation_frontend
+      dockerfile: Dockerfile.frontend
+    container_name: bookrec-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

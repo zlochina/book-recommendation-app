@@ -1,0 +1,43 @@
+# Stage 1: Build dependencies with Poetry
+FROM python:3.11-slim AS builder
+
+# Install Poetry
+ENV POETRY_VERSION=1.8.3
+RUN pip install poetry==$POETRY_VERSION
+
+# Set workdir inside container
+WORKDIR /app
+
+# Copy only dependency files first (to leverage Docker cache)
+COPY pyproject.toml poetry.lock ./
+
+# Install dependencies into a virtual environment
+# --no-root: don’t install the project itself yet
+RUN poetry install --no-root --without dev
+
+# Stage 2: Final runtime image
+FROM python:3.11-slim
+
+# Set environment so poetry won’t create another venv
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install Poetry again in runtime image
+ENV POETRY_VERSION=1.8.3
+RUN pip install "poetry==$POETRY_VERSION"
+
+# Copy project files
+COPY poetry.lock pyproject.toml ./
+COPY ./src/book_recommendation_prod ./book_recommendation_prod
+
+# Install dependencies into system Python (faster startup, simpler PATH)
+RUN poetry install
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Default start command (gunicorn + uvicorn workers is more efficient than plain `uvicorn --reload`)
+# For dev you can override CMD in docker-compose.yml
+CMD ["poetry", "run", "uvicorn", "book_recommendation_prod.main:app", "--host", "0.0.0.0", "--port", "8000"]

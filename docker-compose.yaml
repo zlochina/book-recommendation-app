@@ -17,8 +17,12 @@ services:
     build:
       context: ./src/book_recommendation_frontend
       dockerfile: Dockerfile.frontend
+      args:
+        BACKEND_HOST: "http://backend:8000"
     container_name: bookrec-frontend
     ports:
       - "3000:80"
+    environment:
+      BACKEND_HOST: "http://backend:8000"
     depends_on:
       - backend

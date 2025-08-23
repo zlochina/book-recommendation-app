@@ -31,7 +31,7 @@ async function searchBooks() {
     return
   }
   loading.value = true
-  const res = await fetch(`http://localhost:8000/books?query=${encodeURIComponent(query.value)}`)
+  const res = await fetch(`/api/books?query=${encodeURIComponent(query.value)}`)
   results.value = await res.json()
   loading.value = false
 }

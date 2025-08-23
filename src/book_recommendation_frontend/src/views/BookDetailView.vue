@@ -44,9 +44,9 @@ onMounted(async () => {
   const id = route.params.id
 
   const [bookRes, ratingsRes, recsRes] = await Promise.all([
-    fetch(`http://localhost:8000/books/${id}/details`),
-    fetch(`http://localhost:8000/books/${id}/ratings`),
-    fetch(`http://localhost:8000/books/${id}/recommendations`),
+    fetch(`/api/books/${id}/details`),
+    fetch(`/api/ratings/${id}`),
+    fetch(`/api/books/${id}/recommendations`),
   ])
 
   book.value = await bookRes.json()

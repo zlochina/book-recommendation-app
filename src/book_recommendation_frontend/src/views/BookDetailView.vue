@@ -14,7 +14,7 @@
       <h2 class="text-xl font-semibold mt-6">Ratings</h2>
       <ul>
         <li v-for="rating in ratings" :key="rating.rating_id" class="border-b py-2">
-          User {{ rating.user_id }} rated: {{ rating.user_rating }}/5
+          User {{ rating.user_id }} rated: {{ rating.user_rating }}/10
         </li>
       </ul>
 
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watch } from "vue"
 import { useRoute } from "vue-router"
 
 const route = useRoute()
@@ -40,19 +40,35 @@ const ratings = ref([])
 const recommendations = ref([])
 const loading = ref(true)
 
-onMounted(async () => {
-  const id = route.params.id
+async function fetchBook(id) {
+  loading.value = true
+  try {
+    const [bookRes, ratingsRes, recsRes] = await Promise.all([
+      fetch(`/api/books/${id}`),
+      fetch(`/api/ratings/${id}`),
+      fetch(`/api/books/${id}/recommendations`),
+    ])
 
-  const [bookRes, ratingsRes, recsRes] = await Promise.all([
-    fetch(`/api/books/${id}/details`),
-    fetch(`/api/ratings/${id}`),
-    fetch(`/api/books/${id}/recommendations`),
-  ])
+    book.value = await bookRes.json()
+    ratings.value = (await ratingsRes.json()).ratings
+    recommendations.value = (await recsRes.json()).recommendations
+  } catch (err) {
+    console.error("Failed to load book:", err)
+  } finally {
+    loading.value = false
+  }
+}
 
-  book.value = await bookRes.json()
-  ratings.value = (await ratingsRes.json()).ratings
-  recommendations.value = (await recsRes.json()).recommendations
-  loading.value = false
+onMounted(() => {
+  fetchBook(route.params.id)
 })
+
+// re-run fetch when route param changes (clicking a recommendation)
+watch(
+  () => route.params.id,
+  (newId) => {
+    fetchBook(newId)
+  }
+)
 </script>
 

@@ -1,9 +1,10 @@
 from ..models.schemas import RatingsResponse, Rating
-from .utils import init_pseudo_db
+from fastapi import Request
 
 class BookRatingManager:
-    def __init__(self):
-        _, self.books, self.dataset_preprocessed = init_pseudo_db()
+    def __init__(self, request: Request):
+        self.books = request.app.state.books
+        self.dataset_preprocessed = request.app.state.dataset_preprocessed
         self.dataset_preprocessed["rating-id"] = range(len(self.dataset_preprocessed))
 
     def get_ratings(self, book_id) -> RatingsResponse:

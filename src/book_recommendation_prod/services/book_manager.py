@@ -2,14 +2,16 @@ import pandas as pd
 
 from ..models.schemas import BookRecommendationResponse, BookDetailed, Book
 from ..core.book_rec import extract_interesting_books, compute_final_rating
-from .utils import init_pseudo_db
 from typing import List
+from fastapi import Request
 
 
 class BookManager:
-    def __init__(self):
+    def __init__(self, request: Request):
         # TODO: remove this function and move the loading of data onto database
-        self.ratings, self.books, self.dataset_preprocessed = init_pseudo_db()
+        self.ratings = request.app.state.ratings
+        self.books = request.app.state.books
+        self.dataset_preprocessed = request.app.state.dataset_preprocessed
 
     def get_recommendations(self, book_id: int) -> BookRecommendationResponse:
         book_title = self._get_book_title_by_id(book_id).lower()
